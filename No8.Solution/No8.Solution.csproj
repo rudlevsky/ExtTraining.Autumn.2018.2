@@ -41,11 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\IPrinter.cs" />
     <Compile Include="Models\DataEventArgs.cs" />
     <Compile Include="Printers\CanonPrinter.cs" />
     <Compile Include="Printers\EpsonPrinter.cs" />
-    <Compile Include="Printers\StandartPrinter.cs" />
+    <Compile Include="Printers\Printer.cs" />
     <Compile Include="PrinterManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

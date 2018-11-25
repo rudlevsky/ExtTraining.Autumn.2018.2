@@ -22,14 +22,16 @@ namespace No8.Solution.Console
             {
                 WriteLine("Select your choice:");
                 WriteLine("1:Add new printer");
-                WriteLine("2:Add new canon");
-                WriteLine("3:Add new epson");
-                WriteLine("4:Print on printer");
-                WriteLine("5:Print on canon");
-                WriteLine("6:Print on epson");
+                WriteLine("2:Print on canon");
+                WriteLine("3:Print on epson");
                 WriteLine("0:Exit");
 
-                int choice = int.Parse(ReadLine());
+                int choice;
+
+                if (!int.TryParse(ReadLine(), out choice))
+                {
+                    continue;
+                }
 
                 if (choice == 0) break;
 
@@ -37,47 +39,23 @@ namespace No8.Solution.Console
                 {
                     case 1:
                         GetData();
-                        manager.Add(new StandartPrinter(name, model));
                         break;
                     case 2:
-                        GetData();
-                        manager.Add(new CanonPrinter(name, model));
+                        Print(typeof(CanonPrinter), manager.Print);
                         break;
                     case 3:
-                        GetData();
-                        manager.Add(new EpsonPrinter(name, model));
-                        break;
-                    case 4:
-                        Print(typeof(StandartPrinter), false);
-                        break;
-                    case 5:
-                        Print(typeof(CanonPrinter), false);
-                        break;
-                    case 6:
-                        Print(typeof(EpsonPrinter), true);
-                        break;
-                    default:
+                        Print(typeof(EpsonPrinter), manager.PrintLog);
                         break;
                 }
             }
         }
 
-        private static void Print(Type type, bool logger)
+        private static void Print(Type type, Func<Type, FileStream, string, string> writer)
         {
             Write(manager.ShowPrinters(type));
-            WriteLine("Enter a number (starts from 1):");
+            WriteLine("Enter a model:");
 
-            int userChoise = 0;
-
-            try
-            {
-                userChoise = int.Parse(ReadLine());
-            }
-            catch (FormatException)
-            {
-                Write("Please, input a number.");
-                return;
-            }
+            string model = ReadLine();
 
             var o = new OpenFileDialog();
             o.ShowDialog();
@@ -86,19 +64,16 @@ namespace No8.Solution.Console
             {
                 var file = File.OpenRead(o.FileName);
 
-                if (logger)
-                {
-                    Write(manager.PrintLog(type, file, userChoise));
-                }
-                else
-                {
-                    Write(manager.Print(type, file, userChoise));
-                }
+                Write(writer(type, file, model));
+
+                file.Dispose();
             }
-            catch(ArgumentException)
+            catch (ArgumentException)
             {
                 WriteLine("File path can't be equal to null.");
             }
+
+            o.Dispose();
         }
 
         private static void GetData()
@@ -107,6 +82,21 @@ namespace No8.Solution.Console
             name = ReadLine();
             WriteLine("Enter printer model");
             model = ReadLine();
+
+            AddPrinter(name);
+        }
+
+        private static void AddPrinter(string name)
+        {
+            switch(name)
+            {
+                case "Epson":
+                    manager.Add(new EpsonPrinter(name, model));
+                    break;
+                case "Canon":
+                    manager.Add(new CanonPrinter(name, model));
+                    break;
+            }
         }
 
         private static void Subscribe()
